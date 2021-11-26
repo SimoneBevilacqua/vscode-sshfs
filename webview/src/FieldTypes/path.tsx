@@ -1,8 +1,12 @@
 import * as React from 'react';
 import { promptPath } from '../vscode';
-import { FieldBase } from './base';
+import { FieldBase, Props } from './base';
 
-export class FieldPath extends FieldBase<string | undefined> {
+export interface PathProps<T> extends Props<T>{
+    canSelectFolder?: boolean;
+}
+
+export class FieldPath extends FieldBase<string | undefined ,   PathProps<string | undefined> > {
     public renderInput() {
         return <div className="FieldPath">
             <button onClick={this.prompt}>Prompt</button>
@@ -14,7 +18,7 @@ export class FieldPath extends FieldBase<string | undefined> {
     }
     public prompt = async () => {
         try {
-            this.onChange(await promptPath());
+            this.onChange(await promptPath(this.props.canSelectFolder));
         } catch (e) {
             console.log('Error while prompting file path', e);
         }

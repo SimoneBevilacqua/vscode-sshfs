@@ -28,6 +28,7 @@ export interface SaveConfigResultMessage {
 export interface PromptPathMessage {
   type: 'promptPath';
   uniqueId?: string;
+  canSelectFolder?:boolean;
 }
 export interface PromptPathResultMessage {
   type: 'promptPathResult';

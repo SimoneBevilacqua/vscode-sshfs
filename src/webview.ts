@@ -117,11 +117,15 @@ async function handleMessage(message: Message): Promise<any> {
       });
     }
     case 'promptPath': {
-      const { uniqueId } = message;
+      const { uniqueId, canSelectFolder } = message;
       let uri: vscode.Uri | undefined;
       let error: string | undefined;
       try {
-        const uris = await vscode.window.showOpenDialog({});
+        const uris =
+          canSelectFolder? 
+          await vscode.window.showOpenDialog({canSelectFolders:true}):
+          await vscode.window.showOpenDialog({});
+
         if (uris) [uri] = uris;
       } catch (e) {
         Logging.error`Error handling promptPath message for settings UI:\n${message}\n${e}`;

@@ -113,6 +113,38 @@ export class SSHFileSystem implements vscode.FileSystemProvider {
   public createDirectory(uri: vscode.Uri): void | Promise<void> {
     return this.continuePromise<void>(cb => this.sftp.mkdir(uri.path, cb)).catch(e => this.handleError(uri, e, true));
   }
+
+  private writeLocalFile (uri: vscode.Uri,content: Uint8Array): void
+  {
+
+    if (!this.config.localMirrorDir)
+      return;
+    //to ignore EntryNotFound, and empty files
+    if (!content.length)
+      return;
+    var localPath=vscode.Uri.file(this.config.localMirrorDir + 
+      (this.config.root && uri.path.startsWith(this.config.root) ? uri.path.substring( this.config.root.length ) : uri.path)).path;
+    
+    localPath=path.normalize(localPath);
+
+    
+    var localDir=path.dirname(localPath);
+    this.logging.debug(`XXXX writing Local file: ${uri} in ${localPath}`);
+
+    var fs = require('fs');
+    if (!fs.existsSync(localDir)){
+      this.logging.warning(`create local directory : ${localDir}`);
+      //fs.mkdirSync(localDir, { recursive: true });
+      fs.mkdir(localDir, { recursive: true },  (err) => {
+        if (err) throw err;
+      });
+    }    
+    this.logging.info(`write Local file: ${uri} in ${localPath}`, LOGGING_NO_STACKTRACE);
+    fs.writeFile(localPath,content,(err) => {
+      if (err) throw err;
+    });
+  }
+
   public readFile(uri: vscode.Uri): Uint8Array | Promise<Uint8Array> {
     return new Promise((resolve, reject) => {
       const stream = this.sftp.createReadStream(uri.path, { autoClose: true });
@@ -120,11 +152,14 @@ export class SSHFileSystem implements vscode.FileSystemProvider {
       stream.on('data', bufs.push.bind(bufs));
       stream.on('error', e => this.handleError(uri, e, reject));
       stream.on('close', () => {
-        resolve(new Uint8Array(Buffer.concat(bufs)));
+        const bb=new Uint8Array(Buffer.concat(bufs));
+        this.writeLocalFile(uri,bb);
+        resolve(bb);
       });
     });
   }
   public writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Promise<void> {
+    this.writeLocalFile(uri,content);
     return new Promise(async (resolve, reject) => {
       let mode: number | string | undefined;
       let fileExists = false;

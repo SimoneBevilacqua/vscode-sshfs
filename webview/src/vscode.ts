@@ -1,6 +1,6 @@
 
 import type { ConfigLocation, FileSystemConfig } from './types/fileSystemConfig';
-import type { Message, MessageTypes, PromptPathResultMessage, SaveConfigResultMessage } from './types/webviewMessages';
+import type { Message, MessageTypes, PromptPathResultMessage, SaveConfigResultMessage} from './types/webviewMessages';
 
 interface VSCodeAPI {
   postMessage(msg: Message): void;
@@ -86,7 +86,7 @@ export function deleteConfig(config: FileSystemConfig): Promise<void> {
   });
 }
 
-export function promptPath(): Promise<string | undefined> {
+export function promptPath(canSelectFolder: boolean | undefined): Promise<string | undefined> {
   return new Promise<string | undefined>((resolve, reject) => {
     const uniqueId = Date.now().toString();
     function handler(message: PromptPathResultMessage) {
@@ -96,6 +96,6 @@ export function promptPath(): Promise<string | undefined> {
       resolve(message.path);
     }
     addListener(handler, 'promptPathResult');
-    API.postMessage({ type: 'promptPath', uniqueId });
+    API.postMessage({ type: 'promptPath', uniqueId , canSelectFolder});
   });
 }

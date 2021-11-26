@@ -153,9 +153,16 @@ export function taskCommand(config: FileSystemConfig, onChange: FSCChanged<'task
   return <FieldDropdownWithInput key="taskCommand" label="Task command" {...{ value, values, description }} onChange={callback} optional />
 }
 
+export function  localMirrorDir(config: FileSystemConfig, onChange: FSCChanged<'localMirrorDir'>): React.ReactElement {
+  const callback = (newValue?: string) => onChange('localMirrorDir', newValue);
+  const description = 'A path tolocal mirror directory. Supports environment variables, e.g. `$USERPROFILE/localCopy` or `$HOME/localCopy`';
+  return <FieldPath key="localMirrorDir" label="Local Mirror Directory" value={config.localMirrorDir} onChange={callback} optional description={description}  canSelectFolder={true} />
+}
+
+
 export type FieldFactory = (config: FileSystemConfig, onChange: FSCChanged, onChangeMultiple: FSCChangedMultiple) => React.ReactElement | null;
 export const FIELDS: FieldFactory[] = [
   name, merge, label, group, putty, host, port,
   root, agent, username, password, privateKeyPath, passphrase,
   agentForward, sftpCommand, sftpSudo, terminalCommand, taskCommand,
-  PROXY_FIELD];
+  PROXY_FIELD,  localMirrorDir];

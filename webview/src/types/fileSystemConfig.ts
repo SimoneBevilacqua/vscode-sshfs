@@ -120,6 +120,8 @@ export interface FileSystemConfig extends ConnectConfig {
   _locations: ConfigLocation[];
   /** Internal property keeping track of whether this config is an actually calculated one, and if so, which config it originates from (normally itself) */
   _calculated?: FileSystemConfig;
+ /** Optional path to a localMirror directory */
+ localMirrorDir?: string;
 }
 
 export function invalidConfigName(name: string) {
