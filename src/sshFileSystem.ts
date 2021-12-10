@@ -122,26 +122,33 @@ export class SSHFileSystem implements vscode.FileSystemProvider {
     //to ignore EntryNotFound, and empty files
     if (!content.length)
       return;
-    var localPath=vscode.Uri.file(this.config.localMirrorDir + 
-      (this.config.root && uri.path.startsWith(this.config.root) ? uri.path.substring( this.config.root.length ) : uri.path)).path;
+    var localPath=this.config.localMirrorDir + 
+      (this.config.root && uri.path.startsWith(this.config.root) ? uri.path.substring( this.config.root.length ) : uri.path);
     
     localPath=path.normalize(localPath);
 
-    
     var localDir=path.dirname(localPath);
     this.logging.debug(`XXXX writing Local file: ${uri} in ${localPath}`);
 
     var fs = require('fs');
     if (!fs.existsSync(localDir)){
-      this.logging.warning(`create local directory : ${localDir}`);
+      this.logging.info(`create local directory : ${localDir}`);
       //fs.mkdirSync(localDir, { recursive: true });
       fs.mkdir(localDir, { recursive: true },  (err) => {
-        if (err) throw err;
+        if (err) {
+          this.logging.error(`ERROR in  create local directory : ${localDir} ${err}` , err);
+          this.logging.error(err);
+          throw err;
+        }
       });
     }    
     this.logging.info(`write Local file: ${uri} in ${localPath}`, LOGGING_NO_STACKTRACE);
     fs.writeFile(localPath,content,(err) => {
-      if (err) throw err;
+      if (err) {
+        this.logging.error(`ERROR in write Local file: ${localPath}  ${err}`, err);
+        this.logging.error(err);
+        throw err;
+      }
     });
   }
 
